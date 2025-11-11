@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<title>Compra de Ingressos</title>
+<style>
+    body { font-family: Arial, sans-serif; padding: 20px; background: #f4f4f4; }
+    h2 { margin-top: 20px; }
+    input, select, button { margin: 5px 0; padding: 8px; width: 100%; }
+    .box { background: white; padding: 15px; border-radius: 8px; margin-bottom: 20px; }
+</style>
+</head>
+<body>
+
+<h1 style="text-align:center;">
+  <img src="ph.png" alt="Logo" style="height:60px; display:block; margin:0 auto 10px;">
+  Sistema de Ingressos
+</h1>
+
+
+<!-- EVENTOS -->
+<div class="box">
+    <h2>Eventos</h2>
+    <button onclick="carregarEventos()">Carregar Eventos</button>
+    <select id="eventos" onchange="carregarIngressos()"></select>
+</div>
+
+<!-- INGRESSOS -->
+<div class="box">
+    <h2>Ingressos do Evento</h2>
+    <select id="ingressos"></select>
+    <input type="number" id="quantidade" placeholder="Quantidade" min="1" value="1">
+    <button onclick="comprar()">Comprar Ingresso</button>
+</div>
+
+<pre id="resultado"></pre>
+
+<script>
+let token = localStorage.getItem("cliente_token");
+
+// Se não estiver logado, redireciona para a tela de login
+if (!token) {
+    window.location.href = "cliente_login.html";
+}
+
+
+function carregarEventos() {
+    fetch("http://localhost:8000/api/eventos/")
+    .then(r => r.json())
+    .then(eventos => {
+        let select = document.getElementById("eventos");
+        select.innerHTML = "";
+        eventos.forEach(e => {
+            select.innerHTML += `<option value="${e.id}">${e.nome}</option>`;
+        });
+        carregarIngressos();
+    });
+}
+
+function carregarIngressos() {
+    let eventoId = document.getElementById("eventos").value;
+    fetch(`http://localhost:8000/api/eventos/${eventoId}/ingressos/`)
+    .then(r => r.json())
+    .then(ingressos => {
+        let select = document.getElementById("ingressos");
+        select.innerHTML = "";
+        ingressos.forEach(i => {
+            select.innerHTML += `<option value="${i.id}">Preço: R$ ${i.preco}</option>`;
+        });
+    });
+}
+
+function comprar() {
+    fetch("http://localhost:8000/api/comprar/", {
+        method: "POST",
+        headers: { 
+            "Content-Type": "application/json",
+            "Authorization": `Bearer ${token}`
+        },
+        body: JSON.stringify({
+            ingresso_id: document.getElementById("ingressos").value,
+            quantidade: document.getElementById("quantidade").value
+        })
+    })
+    .then(r => r.json())
+    .then(res => {
+        document.getElementById("resultado").innerText = JSON.stringify(res, null, 2);
+    });
+}
+</script>
+
+</body>
+</html>

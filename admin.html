@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<title>Painel Administrativo</title>
+<style>
+    body { font-family: Arial, sans-serif; background: #f0f0f0; padding: 20px; }
+    h1 { text-align: center; }
+    .box { background: white; padding: 15px; border-radius: 8px; margin-bottom: 20px; }
+    input, button, select { padding: 8px; margin: 5px 0; width: 100%; }
+    table { width: 100%; border-collapse: collapse; margin-top: 10px; }
+    th, td { border: 1px solid #ddd; padding: 8px; text-align: center; }
+    th { background: #333; color: white; }
+    .btn { background: #4CAF50; color: white; border: none; cursor: pointer; }
+    .btn:hover { background: #45a049; }
+</style>
+</head>
+<body>
+
+<h1>🛠 Painel Administrativo</h1>
+
+
+<!-- EVENTOS -->
+<div class="box">
+    <h2>Gerenciar Eventos</h2>
+    <button class="btn" onclick="carregarEventos()">🔄 Atualizar Lista</button>
+    <table id="tabelaEventos">
+        <tr><th>ID</th><th>Nome</th><th>Data</th></tr>
+    </table>
+
+    <h3>Novo Evento</h3>
+    <input type="text" id="nomeEvento" placeholder="Nome do evento">
+    <input type="datetime-local" id="dataEvento">
+    <button class="btn" onclick="criarEvento()">➕ Criar Evento</button>
+</div>
+
+<!-- INGRESSOS -->
+<div class="box">
+    <h2>Gerenciar Ingressos</h2>
+    <button class="btn" onclick="carregarIngressos()">🔄 Atualizar Lista</button>
+    <table id="tabelaIngressos">
+        <tr><th>ID</th><th>Evento ID</th><th>Lote</th><th>Preço</th><th>Disponível</th></tr>
+    </table>
+
+    <h3>Novo Ingresso</h3>
+    <input type="number" id="eventoIdIngresso" placeholder="ID do Evento">
+    <input type="number" id="loteIngresso" placeholder="Lote">
+    <input type="number" id="precoIngresso" placeholder="Preço">
+    <input type="number" id="quantTotal" placeholder="Quantidade total">
+    <input type="number" id="quantDisp" placeholder="Quantidade disponível">
+    <button class="btn" onclick="criarIngresso()">➕ Criar Ingresso</button>
+</div>
+
+<!-- BLOQUEIOS -->
+<div class="box">
+    <h2>Gerenciar Bloqueios de CPF</h2>
+    <button class="btn" onclick="carregarBloqueios()">🔄 Atualizar Lista</button>
+    <table id="tabelaBloqueios">
+        <tr><th>ID</th><th>CPF</th><th>Motivo</th><th>Data</th></tr>
+    </table>
+
+    <h3>Novo Bloqueio</h3>
+    <input type="text" id="cpfBloqueio" placeholder="CPF">
+    <input type="text" id="motivoBloqueio" placeholder="Motivo (opcional)">
+    <button class="btn" onclick="criarBloqueio()">➕ Bloquear CPF</button>
+</div>
+
+<pre id="resultado"></pre>
+
+<script>
+let token = localStorage.getItem("admin_token");
+
+// Se não estiver logado, redireciona para a tela de login
+if (!token) {
+    window.location.href = "admin_login.html";
+}
+
+// =============== LOGIN ===============
+function loginAdmin() {
+    fetch("http://localhost:8000/api/api/token/", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+            username: document.getElementById("username").value,
+            password: document.getElementById("password").value
+        })
+    })
+    .then(r => r.json())
+    .then(dados => {
+        token = dados.access;
+        document.getElementById("resultado").innerText = "✅ Login de admin realizado com sucesso!";
+    });
+}
+
+// =============== EVENTOS ===============
+function carregarEventos() {
+    fetch("http://localhost:8000/api/admin/eventos/", {
+        headers: { "Authorization": `Bearer ${token}` }
+    })
+    .then(r => r.json())
+    .then(eventos => {
+        let tabela = document.getElementById("tabelaEventos");
+        tabela.innerHTML = "<tr><th>ID</th><th>Nome</th><th>Data</th></tr>";
+        eventos.forEach(e => {
+            tabela.innerHTML += `<tr><td>${e.id}</td><td>${e.nome}</td><td>${e.data}</td></tr>`;
+        });
+    });
+}
+
+function criarEvento() {
+    fetch("http://localhost:8000/api/admin/eventos/", {
+        method: "POST",
+        headers: { 
+            "Content-Type": "application/json",
+            "Authorization": `Bearer ${token}` 
+        },
+        body: JSON.stringify({
+            nome: document.getElementById("nomeEvento").value,
+            data: document.getElementById("dataEvento").value
+        })
+    })
+    .then(r => r.json())
+    .then(res => {
+        document.getElementById("resultado").innerText = JSON.stringify(res, null, 2);
+        carregarEventos();
+    });
+}
+
+// =============== INGRESSOS ===============
+function carregarIngressos() {
+    fetch("http://localhost:8000/api/admin/ingressos/", {
+        headers: { "Authorization": `Bearer ${token}` }
+    })
+    .then(r => r.json())
+    .then(ingressos => {
+        let tabela = document.getElementById("tabelaIngressos");
+        tabela.innerHTML = "<tr><th>ID</th><th>Evento ID</th><th>Lote</th><th>Preço</th><th>Disponível</th></tr>";
+        ingressos.forEach(i => {
+            tabela.innerHTML += `<tr>
+                <td>${i.id}</td>
+                <td>${i.evento}</td>
+                <td>${i.lote}</td>
+                <td>R$ ${i.preco}</td>
+                <td>${i.quantidade_disponivel}</td>
+            </tr>`;
+        });
+    });
+}
+
+function criarIngresso() {
+    fetch("http://localhost:8000/api/admin/ingressos/", {
+        method: "POST",
+        headers: { 
+            "Content-Type": "application/json",
+            "Authorization": `Bearer ${token}` 
+        },
+        body: JSON.stringify({
+            evento: document.getElementById("eventoIdIngresso").value,
+            lote: document.getElementById("loteIngresso").value,
+            preco: document.getElementById("precoIngresso").value,
+            quantidade_total: document.getElementById("quantTotal").value,
+            quantidade_disponivel: document.getElementById("quantDisp").value
+        })
+    })
+    .then(r => r.json())
+    .then(res => {
+        document.getElementById("resultado").innerText = JSON.stringify(res, null, 2);
+        carregarIngressos();
+    });
+}
+
+// =============== BLOQUEIOS ===============
+function carregarBloqueios() {
+    fetch("http://localhost:8000/api/admin/bloqueios/", {
+        headers: { "Authorization": `Bearer ${token}` }
+    })
+    .then(r => r.json())
+    .then(bloqueios => {
+        let tabela = document.getElementById("tabelaBloqueios");
+        tabela.innerHTML = "<tr><th>ID</th><th>CPF</th><th>Motivo</th><th>Data</th></tr>";
+        bloqueios.forEach(b => {
+            tabela.innerHTML += `<tr><td>${b.id}</td><td>${b.cpf}</td><td>${b.motivo || '-'}</td><td>${b.data_bloqueio}</td></tr>`;
+        });
+    });
+}
+
+function criarBloqueio() {
+    fetch("http://localhost:8000/api/admin/bloqueios/", {
+        method: "POST",
+        headers: { 
+            "Content-Type": "application/json",
+            "Authorization": `Bearer ${token}` 
+        },
+        body: JSON.stringify({
+            cpf: document.getElementById("cpfBloqueio").value,
+            motivo: document.getElementById("motivoBloqueio").value
+        })
+    })
+    .then(r => r.json())
+    .then(res => {
+        document.getElementById("resultado").innerText = JSON.stringify(res, null, 2);
+        carregarBloqueios();
+    });
+}
+</script>
+
+</body>
+</html>

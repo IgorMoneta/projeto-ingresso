@@ -1,0 +1,15 @@
+# Arquivos de ambiente
+.env
+.env.local
+.env.*.local
+
+# Cache e temporários
+__pycache__/
+*.pyc
+
+# Virtualenv
+venv/
+.env/
+
+# Arquivos do sistema
+.DS_Store

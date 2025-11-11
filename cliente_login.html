@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<title>Área do Cliente</title>
+<style>
+  body { font-family: Arial, sans-serif; background: #f4f4f4; display: flex; justify-content: center; align-items: center; height: 100vh; }
+  .box { background: white; padding: 30px; border-radius: 10px; box-shadow: 0 0 10px rgba(0,0,0,0.2); width: 320px; }
+  h2 { text-align: center; }
+  input, button { width: 100%; padding: 10px; margin: 10px 0; border-radius: 5px; border: 1px solid #ccc; }
+  button { background: #4CAF50; color: white; border: none; cursor: pointer; }
+  button:hover { background: #45a049; }
+  .tabs { display: flex; justify-content: space-around; margin-bottom: 10px; }
+  .tabs button { width: 48%; background: #2196F3; }
+  .tabs button.active { background: #0b7dda; }
+</style>
+</head>
+<body>
+
+<div class="box">
+  <div class="tabs">
+    <button id="btnLogin" class="active" onclick="mostrarLogin()">Login</button>
+    <button id="btnCadastro" onclick="mostrarCadastro()">Cadastro</button>
+  </div>
+
+  <div id="areaLogin">
+    <h2>Entrar</h2>
+    <input type="text" id="loginUser" placeholder="Usuário">
+    <input type="password" id="loginPass" placeholder="Senha">
+    <button onclick="login()">Entrar</button>
+  </div>
+
+  <div id="areaCadastro" style="display:none;">
+    <h2>Cadastrar</h2>
+    <input type="text" id="cadUser" placeholder="Usuário">
+    <input type="text" id="cadCpf" placeholder="CPF (somente números)">
+    <input type="password" id="cadPass" placeholder="Senha">
+    <button onclick="registrar()">Cadastrar</button>
+  </div>
+
+  <pre id="mensagem"></pre>
+</div>
+
+<script>
+function mostrarLogin() {
+  document.getElementById("areaLogin").style.display = "block";
+  document.getElementById("areaCadastro").style.display = "none";
+  document.getElementById("btnLogin").classList.add("active");
+  document.getElementById("btnCadastro").classList.remove("active");
+}
+
+function mostrarCadastro() {
+  document.getElementById("areaLogin").style.display = "none";
+  document.getElementById("areaCadastro").style.display = "block";
+  document.getElementById("btnCadastro").classList.add("active");
+  document.getElementById("btnLogin").classList.remove("active");
+}
+
+function registrar() {
+  fetch("http://localhost:8000/api/registrar/", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      username: document.getElementById("cadUser").value,
+      cpf: document.getElementById("cadCpf").value,
+      password: document.getElementById("cadPass").value
+    })
+  })
+  .then(r => r.json())
+  .then(dados => {
+    if (dados.mensagem) {
+      document.getElementById("mensagem").innerText = "✅ " + dados.mensagem;
+      mostrarLogin();
+    } else {
+      document.getElementById("mensagem").innerText = "❌ " + (dados.erro || "Erro desconhecido.");
+    }
+  });
+}
+
+function login() {
+  fetch("http://localhost:8000/api/api/token/", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      username: document.getElementById("loginUser").value,
+      password: document.getElementById("loginPass").value
+    })
+  })
+  .then(r => r.json())
+  .then(dados => {
+    if (dados.access) {
+      localStorage.setItem("cliente_token", dados.access);
+      window.location.href = "index.html"; // redireciona para o front do cliente
+    } else {
+      document.getElementById("mensagem").innerText = "❌ Usuário ou senha incorretos.";
+    }
+  });
+}
+</script>
+
+</body>
+</html>
