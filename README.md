@@ -12,6 +12,7 @@ Compra e confirmação de pagamento via PIX (simulado)
 🛠 Admin
 Login separado/
 Gerenciamento de eventos, ingressos e bloqueios de CPF
+
 ⚙️ Tecnologias
 
 Backend: Django + Django REST Framework + SimpleJWT
