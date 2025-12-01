@@ -23,9 +23,13 @@ CORS: django-cors-headers
 1️⃣ Backend
 
 cd backend
+
 pip install -r requirements.txt
+
 python manage.py migrate
+
 python manage.py createsuperuser
+
 python manage.py runserver
 
 2️⃣ Frontend
