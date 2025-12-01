@@ -5,21 +5,25 @@
 🚀 Funcionalidades]
 
 👤 Cliente
-Cadastro e login com CPF
-Listagem de eventos e ingressos
+Cadastro e login com CPF/
+Listagem de eventos e ingressos/
 Compra e confirmação de pagamento via PIX (simulado)
 
 🛠 Admin
-Login separado
+Login separado/
 Gerenciamento de eventos, ingressos e bloqueios de CPF
 ⚙️ Tecnologias
 
 Backend: Django + Django REST Framework + SimpleJWT
+
 Frontend: HTML, CSS e JavaScript (Fetch API)
+
 Autenticação: JWT
+
 CORS: django-cors-headers
 
 🧩 Como Rodar
+
 1️⃣ Backend
 
 cd backend
