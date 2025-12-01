@@ -26,20 +26,26 @@ cd backend
 
 pip install -r requirements.txt
 
-python manage.py migrate
+python manage.py makemigrations 
+
+python manage.py makemigrations ingresso
 
 python manage.py createsuperuser
+
+python manage.py migrate
 
 python manage.py runserver
 
 2️⃣ Frontend
 
 cd frontend
+
 python -m http.server 5500
 
 3️⃣ Acesse
 
 👤 Cliente: http://localhost:5500/cliente_login.html
+
 🛠 Admin: http://localhost:5500/admin_login.html
 
 
